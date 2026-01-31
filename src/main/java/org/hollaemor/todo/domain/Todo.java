@@ -28,13 +28,21 @@ public class Todo {
     }
 
     public void markDone() {
-        this.status = Todo.Status.DONE;
+        this.status = Status.DONE;
         this.doneDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
     }
 
     public void markNotDone() {
-        this.status = Todo.Status.NOT_DONE;
+        this.status = Status.NOT_DONE;
         this.doneDateTime = null;
+    }
+
+    public boolean isDone() {
+        return status == Status.DONE;
+    }
+
+    public boolean isNotDone() {
+        return !isDone();
     }
 
 }

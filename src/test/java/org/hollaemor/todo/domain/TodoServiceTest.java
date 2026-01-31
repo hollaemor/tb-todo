@@ -126,7 +126,7 @@ class TodoServiceTest {
             assertThatExceptionOfType(IllegalTodoStatusUpdateException.class)
                     .isThrownBy(() -> todoService.updateTodo(TodoId.newInstance(),
                             new UpdateTodoCommand(Optional.empty(), Optional.of(Todo.Status.PAST_DUE))));
-            
+
             verify(todoRepository, never()).save(any());
         }
 
@@ -153,7 +153,6 @@ class TodoServiceTest {
             assertThat(todo.getStatus()).isEqualTo(Todo.Status.DONE);
             assertThat(todo.getDoneDateTime()).isNotNull();
             assertThat(todo.getDescription()).isEqualTo("The Onion");
-
 
             verify(todoRepository).save(any());
         }
@@ -182,8 +181,24 @@ class TodoServiceTest {
             assertThat(todo.getStatus()).isEqualTo(Todo.Status.NOT_DONE);
             assertThat(todo.getDoneDateTime()).isNull();
 
-
             verify(todoRepository).save(any());
+        }
+
+        @Test
+        void todoNotSavedWhenNoUpdateIsRequired() {
+
+            var todo = Todo.builder()
+                    .status(Todo.Status.NOT_DONE)
+                    .description("The Verge.com")
+                    .dueDateTime(ZonedDateTime.now())
+                    .build();
+
+            given(todoRepository.findByIdForUpdate(any())).willReturn(Optional.of(todo));
+
+            todoService.updateTodo(TodoId.newInstance(),
+                    new UpdateTodoCommand(Optional.empty(), Optional.of(Todo.Status.NOT_DONE)));
+
+            verify(todoRepository, never()).save(any());
         }
 
     }

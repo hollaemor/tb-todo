@@ -2,6 +2,7 @@ package org.hollaemor.todo.domain;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,6 @@ public class TodoService {
         return todoRepository.findById(todoId).orElseThrow(() -> new TodoNotFoundException(todoId));
     }
 
-
     @Transactional
     public Todo updateTodo(TodoId todoId, UpdateTodoCommand command) {
 
@@ -35,22 +35,28 @@ public class TodoService {
             throw new TodoPastDueException();
         }
 
-        command.descriptionOptional().ifPresent( todo::setDescription);
+        var persistenceRequired = new AtomicBoolean();
+
+        command.descriptionOptional().ifPresent(todo::setDescription);
         command.statusOptional().ifPresent(status -> {
 
-            switch(status){
-                case Todo.Status.DONE:
-                    todo.markDone();
-                    break;
-                case Todo.Status.NOT_DONE:
-                    todo.markNotDone();
-                    break;
-                default:
-                    throw new IllegalTodoStatusUpdateException("Updating the todo to this status is forbidden");
+            if (status == Todo.Status.PAST_DUE) {
+                throw new IllegalTodoStatusUpdateException("Updating the todo to this status is forbidden");
             }
 
+            if (status == Todo.Status.DONE && todo.isNotDone()) {
+                todo.markDone();
+                persistenceRequired.set(true);
+            } else if (status == Todo.Status.NOT_DONE && todo.isDone()) {
+                todo.markNotDone();
+                persistenceRequired.set(true);
+            }
         });
-        return todoRepository.save(todo);
+        if (persistenceRequired.get()) {
+
+            return todoRepository.save(todo);
+        }
+        return todo;
 
     }
 }
