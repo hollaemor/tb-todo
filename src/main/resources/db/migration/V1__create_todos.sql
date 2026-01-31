@@ -1,0 +1,9 @@
+
+CREATE TABLE todos (
+    id UUID NOT NULL PRIMARY KEY,
+    description VARCHAR NOT NULL,
+    status VARCHAR NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE,
+    due_date_time TIMESTAMP WITH TIME ZONE,
+    done_date_time TIMESTAMP WITH TIME ZONE
+);
