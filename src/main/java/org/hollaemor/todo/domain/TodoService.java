@@ -19,4 +19,8 @@ public class TodoService {
                         .createdAt(ZonedDateTime.now(ZoneId.of("UTC")))
                         .status(Todo.Status.NOT_DONE).build());
     }
+
+    public Todo getTodo(TodoId todoId) {
+        return todoRepository.findById(todoId).orElseThrow(() -> new TodoNotFoundException(todoId));
+    }
 }

@@ -4,24 +4,33 @@ import java.util.UUID;
 
 import org.hollaemor.todo.domain.TodoRepository;
 import org.hollaemor.todo.domain.Todo;
+import org.hollaemor.todo.domain.TodoId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Objects;
+import java.util.Optional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, TodoRepository {
 
-    default Todo save(Todo todo) {
-        var entity = TodoEntity.from(todo);
+  default Todo save(Todo todo) {
+    var entity = TodoEntity.from(todo);
 
-        if (Objects.isNull(entity.getCreatedAt())) {
-            entity.setCreatedAt(ZonedDateTime.now(ZoneId.of("UTC")));
-        }
-
-        if (Objects.isNull(entity.getId())) {
-            entity.setId(UUID.randomUUID());
-        }
-        return this.save(entity).toDomain();
+    if (Objects.isNull(entity.getCreatedAt())) {
+      entity.setCreatedAt(ZonedDateTime.now(ZoneId.of("UTC")));
     }
+
+    if (Objects.isNull(entity.getId())) {
+      entity.setId(UUID.randomUUID());
+    }
+    return this.save(entity).toDomain();
+  }
+
+  default Optional<Todo> findById(TodoId todoId) {
+    var optionalEntity = findById(todoId.value());
+
+    return optionalEntity.map(TodoEntity::toDomain);
+
+  }
 
 }
