@@ -37,7 +37,13 @@ public class TodoService {
 
         var persistenceRequired = new AtomicBoolean();
 
-        command.descriptionOptional().ifPresent(todo::setDescription);
+        command.descriptionOptional().ifPresent(
+                description -> {
+                    if (!todo.getDescription().equals(description)) {
+                        todo.setDescription(description);
+                        persistenceRequired.set(true);
+                    }
+                });
         command.statusOptional().ifPresent(status -> {
 
             if (status == Todo.Status.PAST_DUE) {
