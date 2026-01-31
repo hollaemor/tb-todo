@@ -6,6 +6,11 @@ import org.hollaemor.todo.domain.TodoRepository;
 import org.hollaemor.todo.domain.Todo;
 import org.hollaemor.todo.domain.TodoId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+
+import jakarta.persistence.LockModeType;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.time.ZoneId;
@@ -13,24 +18,31 @@ import java.time.ZonedDateTime;
 
 public interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, TodoRepository {
 
-  default Todo save(Todo todo) {
-    var entity = TodoEntity.from(todo);
+    default Todo save(Todo todo) {
+        var entity = TodoEntity.from(todo);
 
-    if (Objects.isNull(entity.getCreatedAt())) {
-      entity.setCreatedAt(ZonedDateTime.now(ZoneId.of("UTC")));
+        if (Objects.isNull(entity.getCreatedAt())) {
+            entity.setCreatedAt(ZonedDateTime.now(ZoneId.of("UTC")));
+        }
+
+        if (Objects.isNull(entity.getId())) {
+            entity.setId(UUID.randomUUID());
+        }
+        return this.save(entity).toDomain();
     }
 
-    if (Objects.isNull(entity.getId())) {
-      entity.setId(UUID.randomUUID());
+    default Optional<Todo> findById(TodoId todoId) {
+        return findById(todoId.value()).map(TodoEntity::toDomain);
+
     }
-    return this.save(entity).toDomain();
-  }
 
-  default Optional<Todo> findById(TodoId todoId) {
-    var optionalEntity = findById(todoId.value());
+    @Query("SELECT t FROM TodoEntity t WHERE t.id = :id")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<TodoEntity> findByIdWithLock(UUID id);
 
-    return optionalEntity.map(TodoEntity::toDomain);
+    default Optional<Todo> findByIdForUpdate(TodoId todoId) {
+        return findByIdWithLock(todoId.value()).map(TodoEntity::toDomain);
 
-  }
+    }
 
 }

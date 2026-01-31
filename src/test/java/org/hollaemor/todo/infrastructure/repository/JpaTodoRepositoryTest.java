@@ -77,4 +77,21 @@ class JpaTodoRepositoryTest {
 
   }
 
+  @Test
+  void testFindByIdForUpdate() {
+
+    var uuid = UUID.randomUUID();
+
+    var entity = new TodoEntity();
+    entity.setId(uuid);
+    entity.setDescription("Stop the rain");
+    entity.setStatus(Todo.Status.DONE);
+
+    tem.persistAndFlush(entity);
+
+    var optTodo = repository.findByIdForUpdate(new TodoId(uuid));
+
+    assertThat(optTodo).isPresent();
+  }
+
 }

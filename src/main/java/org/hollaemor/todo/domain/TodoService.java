@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,5 +23,34 @@ public class TodoService {
 
     public Todo getTodo(TodoId todoId) {
         return todoRepository.findById(todoId).orElseThrow(() -> new TodoNotFoundException(todoId));
+    }
+
+
+    @Transactional
+    public Todo updateTodo(TodoId todoId, UpdateTodoCommand command) {
+
+        var todo = todoRepository.findByIdForUpdate(todoId).orElseThrow(() -> new TodoNotFoundException(todoId));
+
+        if (todo.isPastDue()) {
+            throw new TodoPastDueException();
+        }
+
+        command.descriptionOptional().ifPresent( todo::setDescription);
+        command.statusOptional().ifPresent(status -> {
+
+            switch(status){
+                case Todo.Status.DONE:
+                    todo.markDone();
+                    break;
+                case Todo.Status.NOT_DONE:
+                    todo.markNotDone();
+                    break;
+                default:
+                    throw new IllegalTodoStatusUpdateException("Updating the todo to this status is forbidden");
+            }
+
+        });
+        return todoRepository.save(todo);
+
     }
 }

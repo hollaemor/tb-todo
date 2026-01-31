@@ -8,4 +8,6 @@ public interface TodoRepository {
 
   Optional<Todo> findById(TodoId todoId);
 
+  Optional<Todo> findByIdForUpdate(TodoId todoId);
+
 }
