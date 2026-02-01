@@ -13,4 +13,6 @@ public interface TodoRepository {
   /* Updates todo items that are overdue, returning a count of the updated items */
   long updateOverdueTodos();
 
+  GetTodosResult findTodos(GetTodosCommand command);
+
 }

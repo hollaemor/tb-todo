@@ -3,8 +3,13 @@ package org.hollaemor.todo.infrastructure.repository;
 import java.util.UUID;
 
 import org.hollaemor.todo.domain.TodoRepository;
+import org.hollaemor.todo.domain.GetTodosCommand;
+import org.hollaemor.todo.domain.GetTodosResult;
 import org.hollaemor.todo.domain.Todo;
 import org.hollaemor.todo.domain.TodoId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -53,6 +58,20 @@ public interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, Todo
     @Override
     default long updateOverdueTodos() {
         return updateStatuses(Todo.Status.NOT_DONE, ZonedDateTime.now(ZoneId.of("UTC")), Todo.Status.PAST_DUE);
+    }
+
+    @Query(value = "SELECT t FROM TodoEntity t WHERE t.status = :status", countQuery = "SELECT COUNT(t) FROM TodoEntity t WHERE t.status = :status")
+    Page<TodoEntity> findAllByStatus(Todo.Status status, Pageable pageable);
+
+    default GetTodosResult findTodos(GetTodosCommand command) {
+        var page = PageRequest.of(command.page(), command.pageSize());
+
+        var pagedResult = command.optionalStatus().map(status -> findAllByStatus(status, page)).orElse(findAll(page));
+
+        return new GetTodosResult(
+                pagedResult.getContent().stream().map(TodoEntity::toDomain).toList(),
+                page.getPageNumber(),
+                pagedResult.getTotalElements());
     }
 
 }

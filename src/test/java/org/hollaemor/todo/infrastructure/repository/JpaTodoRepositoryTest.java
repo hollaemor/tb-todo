@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.within;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.hollaemor.todo.domain.GetTodosCommand;
 import org.hollaemor.todo.domain.Todo;
 import org.hollaemor.todo.domain.TodoId;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
@@ -108,11 +111,61 @@ class JpaTodoRepositoryTest {
     var updatedRecords = repository.updateOverdueTodos();
     assertThat(updatedRecords).isEqualTo(1);
 
-
     tem.refresh(entity);
 
     assertThat(entity.getStatus()).isEqualTo(Todo.Status.PAST_DUE);
 
   }
 
+  @Test
+  void testFindTodosWithEmptyStatusReturnsAll() {
+
+    var entity = new TodoEntity();
+    entity.setId(UUID.randomUUID());
+    entity.setDescription("Another one");
+    entity.setStatus(Todo.Status.NOT_DONE);
+    entity.setDueDateTime(ZonedDateTime.now().minusDays(2));
+
+    tem.persistAndFlush(entity);
+
+    var result = repository.findTodos(new GetTodosCommand(0, 1, Optional.empty()));
+
+    assertThat(result.totalCount()).isEqualTo(1);
+    assertThat(result.todos().get(0).getId().value()).isEqualTo(entity.getId());
+  }
+
+  @Test
+  @DisplayName("No Todo returned when queried status not found")
+  void testFindTodosWithDifferentStatusReturnsNoTodo() {
+    var entity = new TodoEntity();
+    entity.setId(UUID.randomUUID());
+    entity.setDescription("Another one");
+    entity.setStatus(Todo.Status.NOT_DONE);
+    entity.setDueDateTime(ZonedDateTime.now().minusDays(2));
+
+    tem.persistAndFlush(entity);
+
+    var result = repository.findTodos(new GetTodosCommand(0, 1, Optional.of(Todo.Status.DONE)));
+
+    assertThat(result.totalCount()).isZero();
+    assertThat(result.todos()).isEmpty();
+
+  }
+
+  @Test
+  void testTodoWithQueriedStatusIsReturned() {
+    var entity = new TodoEntity();
+    entity.setId(UUID.randomUUID());
+    entity.setDescription("Another one");
+    entity.setStatus(Todo.Status.NOT_DONE);
+    entity.setDueDateTime(ZonedDateTime.now().minusDays(2));
+
+    tem.persistAndFlush(entity);
+
+    var result = repository.findTodos(new GetTodosCommand(0, 1, Optional.of(Todo.Status.NOT_DONE)));
+
+    assertThat(result.totalCount()).isEqualTo(1);
+    assertThat(result.todos().get(0).getStatus()).isEqualTo(Todo.Status.NOT_DONE);
+
+  }
 }

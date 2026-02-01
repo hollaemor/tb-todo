@@ -26,6 +26,11 @@ public class TodoService {
         return todoRepository.findById(todoId).orElseThrow(() -> new TodoNotFoundException(todoId));
     }
 
+    public GetTodosResult getTodos(GetTodosCommand command) {
+        return todoRepository.findTodos(command);
+    }
+
+
     @Transactional
     public Todo updateTodo(TodoId todoId, UpdateTodoCommand command) {
 
