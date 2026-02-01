@@ -7,6 +7,7 @@ import org.hollaemor.todo.domain.Todo;
 import org.hollaemor.todo.domain.TodoId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import jakarta.persistence.LockModeType;
@@ -43,6 +44,15 @@ public interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, Todo
     default Optional<Todo> findByIdForUpdate(TodoId todoId) {
         return findByIdWithLock(todoId.value()).map(TodoEntity::toDomain);
 
+    }
+
+    @Modifying
+    @Query("UPDATE TodoEntity t SET t.status = :newStatus WHERE t.dueDateTime < :cutOverDateTime AND t.status = :currentStatus")
+    long updateStatuses(Todo.Status currentStatus, ZonedDateTime cutOverDateTime, Todo.Status newStatus);
+
+    @Override
+    default long updateOverdueTodos() {
+        return updateStatuses(Todo.Status.NOT_DONE, ZonedDateTime.now(ZoneId.of("UTC")), Todo.Status.PAST_DUE);
     }
 
 }

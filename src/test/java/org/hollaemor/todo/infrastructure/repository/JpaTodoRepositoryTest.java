@@ -94,4 +94,25 @@ class JpaTodoRepositoryTest {
     assertThat(optTodo).isPresent();
   }
 
+  @Test
+  void testUpdateOverdueTodos() {
+
+    var entity = new TodoEntity();
+    entity.setId(UUID.randomUUID());
+    entity.setDescription("The Procastinator");
+    entity.setStatus(Todo.Status.NOT_DONE);
+    entity.setDueDateTime(ZonedDateTime.now().minusDays(2));
+
+    tem.persistAndFlush(entity);
+
+    var updatedRecords = repository.updateOverdueTodos();
+    assertThat(updatedRecords).isEqualTo(1);
+
+
+    tem.refresh(entity);
+
+    assertThat(entity.getStatus()).isEqualTo(Todo.Status.PAST_DUE);
+
+  }
+
 }
