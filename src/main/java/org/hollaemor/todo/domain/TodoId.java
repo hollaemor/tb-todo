@@ -7,4 +7,8 @@ public record TodoId(UUID value) {
     public static TodoId newInstance() {
         return new TodoId(UUID.randomUUID());
     }
+
+    public static TodoId of(UUID uuid) {
+        return new TodoId(uuid);
+    }
 }

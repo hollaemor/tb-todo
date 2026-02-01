@@ -10,7 +10,7 @@ public interface TodoRepository {
 
   Optional<Todo> findByIdForUpdate(TodoId todoId);
 
-  /* Updates todo items that are overdue, returning a count of the updated items */
+  // Updates todo items that are overdue, returning a count of the updated items 
   long updateOverdueTodos();
 
   GetTodosResult findTodos(GetTodosCommand command);

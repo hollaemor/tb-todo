@@ -5,5 +5,6 @@ CREATE TABLE todos (
     status VARCHAR NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     due_date_time TIMESTAMP WITH TIME ZONE,
-    done_date_time TIMESTAMP WITH TIME ZONE
+    done_date_time TIMESTAMP WITH TIME ZONE,
+    UNIQUE(description, due_date_time, status)
 );

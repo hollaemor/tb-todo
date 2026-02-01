@@ -14,5 +14,7 @@ public record GetTodosCommand(int page, int pageSize, Optional<Status> optionalS
             throw new IllegalArgumentException("pageSize must be greater than 0");
         }
     }
-
+    public static GetTodosCommand from(int page, int pageSize, Optional<Status> optionalStatus) {
+        return new GetTodosCommand(page, pageSize, optionalStatus);
+    }
 }
