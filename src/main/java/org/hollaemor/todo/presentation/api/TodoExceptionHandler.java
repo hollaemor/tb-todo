@@ -49,7 +49,7 @@ class TodoExceptionHandler {
 
     @ExceptionHandler(TodoPastDueException.class)
     ProblemDetail pastDueException(TodoPastDueException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), ex.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +30,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -93,7 +93,7 @@ class TodoControllerTest {
                                 ]
                             }
                                 """);
-            BDDMockito.verifyNoInteractions(todoService);
+            verifyNoInteractions(todoService);
         }
 
         @ParameterizedTest
@@ -115,12 +115,12 @@ class TodoControllerTest {
                                 ]
                             }
                                 """);
-            BDDMockito.verifyNoInteractions(todoService);
+            verifyNoInteractions(todoService);
         }
 
         @Test
         @MethodSource("invalidDates")
-        @DisplayName("Bad request is returned for invalid due date")
+        @DisplayName("Unprocessible entity is returned for invalid due date")
         void whenDueDateIsNull() {
             restTestClient.post().uri("/todos")
                     .body(new CreateTodo("Clear the snow", null))
@@ -136,7 +136,7 @@ class TodoControllerTest {
                                 ]
                             }
                                 """);
-            BDDMockito.verifyNoInteractions(todoService);
+            verifyNoInteractions(todoService);
         }
 
         static Stream<ZonedDateTime> invalidDates() {
@@ -350,7 +350,7 @@ class TodoControllerTest {
 
         @Test
         @DisplayName("Prevent update of past due todo")
-        void whenTodoIsPastDueThenBadRequesIsReturned() {
+        void whenTodoIsPastDueThenForbiddenIsReturned() {
 
             given(todoService.updateTodo(any(), any()))
                     .willThrow(new TodoPastDueException());
@@ -363,7 +363,7 @@ class TodoControllerTest {
                             }
                             """)
                     .exchange()
-                    .expectStatus().isBadRequest()
+                    .expectStatus().isForbidden()
                     .expectBody().jsonPath("$.detail")
                     .value(String.class, message -> assertThat(message).contains("can no longer be updated"));
 
