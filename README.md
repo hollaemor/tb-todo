@@ -65,7 +65,7 @@ The Todo service provides a simple API for creating, retrieving, and updating to
     ```bash
     java -jar target/todo-0.0.1-SNAPSHOT.jar
     ```
-    The service will be available at `http://localhost:8080`. ( A different port can be specified by setting the `TB_TODO_SERVER_PORT` environment variable.)
+    The service will be available at `http://localhost:8080`. ( _A different port can be specified by setting the `TB_TODO_SERVER_PORT` environment variable._)
 
 ### Run Tests
 
