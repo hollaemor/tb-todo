@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 
 import org.hollaemor.todo.domain.TodoService;
 import org.hollaemor.todo.domain.UpdateTodoCommand;
-import org.hibernate.exception.ConstraintViolationException;
 import org.hollaemor.todo.domain.GetTodosCommand;
 import org.hollaemor.todo.domain.GetTodosResult;
 import org.hollaemor.todo.domain.IllegalTodoStatusUpdateException;
@@ -157,7 +156,7 @@ class TodoControllerTest {
                     .body("""
                             {
                                 "description": "Drink some water",
-                                "dueDateTime": "%s"
+                                "due_datetime": "%s"
                             }
 
                             """
