@@ -20,7 +20,7 @@ class ScheduledTasks {
     void updateOverdueItems() {
         try {
             var updateCount = todoRepository.updateOverdueTodos();
-            log.info("{} overdue todos updated", updateCount);
+            log.info("{} overdue todo(s) updated", updateCount);
 
         } catch (Exception ex) {
             log.error("An error occured while updating overdue todos", ex);

@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-public interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, TodoRepository {
+interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, TodoRepository {
 
     default Todo save(Todo todo) {
         var entity = TodoEntity.from(todo);

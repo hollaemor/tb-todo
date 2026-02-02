@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.hollaemor.todo.domain.Todo;
 import org.hollaemor.todo.domain.UpdateTodoCommand;
 
-public record UpdateTodo(String description, String status) {
+record UpdateTodo(String description, String status) {
 
     public UpdateTodoCommand toDomain() {
         return new UpdateTodoCommand(Optional.ofNullable(description),

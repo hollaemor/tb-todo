@@ -66,7 +66,7 @@ class JpaTodoRepositoryTest {
 
     tem.persistAndFlush(entity);
 
-    var optTodo = repository.findById(new TodoId(uuid));
+    var optTodo = repository.findById(TodoId.of(uuid));
 
     assertThat(optTodo).isPresent();
 
@@ -75,7 +75,7 @@ class JpaTodoRepositoryTest {
   @Test
   void whenIdDoesNotExistThenNothingIsReturned() {
 
-    var optTodo = repository.findById(new TodoId(UUID.randomUUID()));
+    var optTodo = repository.findById(TodoId.newInstance());
     assertThat(optTodo).isNotPresent();
 
   }
@@ -92,7 +92,7 @@ class JpaTodoRepositoryTest {
 
     tem.persistAndFlush(entity);
 
-    var optTodo = repository.findByIdForUpdate(new TodoId(uuid));
+    var optTodo = repository.findByIdForUpdate(TodoId.of(uuid));
 
     assertThat(optTodo).isPresent();
   }

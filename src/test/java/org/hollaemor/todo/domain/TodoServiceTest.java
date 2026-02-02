@@ -12,14 +12,12 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -40,19 +38,16 @@ class TodoServiceTest {
         @Test
         void testTodoCreated() {
 
-                // given
-                given(todoRepository.save(BDDMockito.any()))
+                given(todoRepository.save(any()))
                                 .willAnswer(answer -> {
                                         Todo todo = answer.getArgument(0);
-                                        todo.setId(new TodoId(UUID.randomUUID()));
+                                        todo.setId(TodoId.newInstance());
                                         return todo;
                                 });
 
-                // when
                 var todo = todoService
                                 .createTodo(new CreateTodoCommand("Water the plants", ZonedDateTime.now().plusDays(3)));
 
-                // then
                 assertThat(todo.getId().value()).isNotNull();
                 assertThat(todo.getDoneDateTime()).isNull();
                 assertThat(todo.getStatus()).isEqualTo(Todo.Status.NOT_DONE);
