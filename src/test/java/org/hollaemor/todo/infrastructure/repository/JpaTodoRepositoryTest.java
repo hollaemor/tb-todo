@@ -30,7 +30,6 @@ class JpaTodoRepositoryTest {
   @Test
   void testTodoIsPersisted() {
 
-    // given
     var todo = Todo.builder()
         .description("Create some code")
         .status(Todo.Status.DONE)
@@ -40,10 +39,8 @@ class JpaTodoRepositoryTest {
 
     assertThat(todo.getId()).isNull();
 
-    // when
     var persistedDomain = repository.save(todo);
 
-    // then
     var persistedEntity = tem.find(TodoEntity.class, persistedDomain.getId().value());
 
     assertThat(persistedEntity).isNotNull();

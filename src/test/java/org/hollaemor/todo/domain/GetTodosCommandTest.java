@@ -20,7 +20,7 @@ class GetTodosCommandTest {
 
     @ParameterizedTest
     @ValueSource(ints = { -1, 0 })
-    void testExcptionThrownWhenPageSizeIsInvalid(int pageSize) {
+    void testExceptionThrownWhenPageSizeIsInvalid(int pageSize) {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new GetTodosCommand(0, pageSize, Optional.empty()))
                 .withMessage("pageSize must be greater than 0");
