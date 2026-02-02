@@ -16,6 +16,7 @@ import org.hollaemor.todo.domain.UpdateTodoCommand;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hollaemor.todo.domain.GetTodosCommand;
 import org.hollaemor.todo.domain.GetTodosResult;
+import org.hollaemor.todo.domain.IllegalTodoStatusUpdateException;
 import org.hollaemor.todo.domain.InvalidTodoCreationException;
 import org.hollaemor.todo.domain.Todo;
 import org.hollaemor.todo.domain.TodoId;
@@ -369,6 +370,26 @@ class TodoControllerTest {
 
         }
 
+        @Test
+        @DisplayName("Prevent manual update to past due")
+        void whenUpdateStatusIsPastDueThenReturnForbidden() {
+
+            given(todoService.updateTodo(any(), any()))
+                    .willThrow(new IllegalTodoStatusUpdateException("don't do that"));
+
+            restTestClient.patch().uri("/todos/{id}", TODO_RESPONSE.getId().value())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("""
+                            {
+                                "description": "Vacuum the apartment",
+                                "status": "past due"
+                            }
+                            """)
+                    .exchange()
+                    .expectStatus().isForbidden()
+                    .expectBody().jsonPath("$.detail").isEqualTo("don't do that");
+
+        }
 
         @Test
         void whenUniqueConstraintIsViolatedThenReturnConflict() {

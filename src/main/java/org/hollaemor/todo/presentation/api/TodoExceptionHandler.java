@@ -2,6 +2,7 @@ package org.hollaemor.todo.presentation.api;
 
 import java.util.List;
 
+import org.hollaemor.todo.domain.IllegalTodoStatusUpdateException;
 import org.hollaemor.todo.domain.InvalidTodoCreationException;
 import org.hollaemor.todo.domain.TodoNotFoundException;
 import org.hollaemor.todo.domain.TodoPastDueException;
@@ -56,6 +57,11 @@ class TodoExceptionHandler {
         log.error("Database constraint violated", ex);
         return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(409),
                 "A todo already exists with the same status, description and due datetime");
+    }
+
+    @ExceptionHandler(IllegalTodoStatusUpdateException.class)
+    ProblemDetail handlerIllegalStatusUpdate(IllegalTodoStatusUpdateException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), ex.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
