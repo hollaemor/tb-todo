@@ -1,6 +1,7 @@
 package org.hollaemor.todo.infrastructure.repository;
 
 import java.io.Serializable;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -48,14 +49,15 @@ class TodoEntity implements Serializable {
 
     static TodoEntity from(final Todo todo) {
         var entity = TodoEntity.builder()
-                .createdAt(todo.getCreatedAt())
                 .description(todo.getDescription())
                 .status(todo.getStatus())
                 .dueDateTime(todo.getDueDateTime())
                 .doneDateTime(todo.getDoneDateTime())
                 .build();
 
-        entity.setId(Objects.isNull(todo.getId()) ? null : todo.getId().value());
+        entity.setId(Objects.isNull(todo.getId()) ? UUID.randomUUID() : todo.getId().value());
+        entity.setCreatedAt(Objects.isNull(todo.getCreatedAt()) ? ZonedDateTime.now(ZoneId.of("UTC")) : todo.getCreatedAt());
+        
         return entity;
     }
 

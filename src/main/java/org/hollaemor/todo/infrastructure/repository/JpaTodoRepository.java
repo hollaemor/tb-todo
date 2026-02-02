@@ -17,7 +17,6 @@ import org.springframework.data.jpa.repository.Query;
 
 import jakarta.persistence.LockModeType;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -26,14 +25,6 @@ public interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, Todo
 
     default Todo save(Todo todo) {
         var entity = TodoEntity.from(todo);
-
-        if (Objects.isNull(entity.getCreatedAt())) {
-            entity.setCreatedAt(ZonedDateTime.now(ZoneId.of("UTC")));
-        }
-
-        if (Objects.isNull(entity.getId())) {
-            entity.setId(UUID.randomUUID());
-        }
         return this.save(entity).toDomain();
     }
 
