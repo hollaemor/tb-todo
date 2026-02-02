@@ -24,8 +24,7 @@ import java.time.ZonedDateTime;
 interface JpaTodoRepository extends JpaRepository<TodoEntity, UUID>, TodoRepository {
 
     default Todo save(Todo todo) {
-        var entity = TodoEntity.from(todo);
-        return this.save(entity).toDomain();
+        return this.save(TodoEntity.from(todo)).toDomain();
     }
 
     default Optional<Todo> findById(TodoId todoId) {
