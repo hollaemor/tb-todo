@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import org.springframework.util.StringUtils;
 
-// NOTE: the assumption is that a todo is created with the not_done status
 public record CreateTodoCommand(String description, ZonedDateTime dueDateTime) {
     public CreateTodoCommand {
 
