@@ -30,7 +30,6 @@ public class TodoService {
         return todoRepository.findTodos(command);
     }
 
-
     @Transactional
     public Todo updateTodo(TodoId todoId, UpdateTodoCommand command) {
 
@@ -63,11 +62,8 @@ public class TodoService {
                 persistenceRequired.set(true);
             }
         });
-        if (persistenceRequired.get()) {
 
-            return todoRepository.save(todo);
-        }
-        return todo;
+        return persistenceRequired.get() ? todoRepository.save(todo) : todo;
 
     }
 }
