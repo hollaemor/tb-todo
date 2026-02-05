@@ -17,7 +17,7 @@ public class Todo {
     private ZonedDateTime createdAt;
     private ZonedDateTime dueDateTime;
     private ZonedDateTime doneDateTime;
-    Status status;
+    private Status status;
 
     public enum Status {
 
