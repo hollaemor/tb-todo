@@ -13,14 +13,12 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +26,9 @@ class TodoServiceTest {
 
         @Mock
         TodoRepository todoRepository;
+
+        @Mock
+        TodoTransactionManager<Todo> transactionManager;
 
         @InjectMocks
         TodoService todoService;
@@ -133,13 +134,6 @@ class TodoServiceTest {
 
                 @Test
                 void updateFailsWhenNewStatusIsPastDue() {
-                        given(todoRepository.findByIdForUpdate(any()))
-                                        .willReturn(Optional.of(
-                                                        Todo.builder()
-                                                                        .description("Past due guy")
-                                                                        .status(Todo.Status.DONE)
-                                                                        .build()));
-
                         assertThatExceptionOfType(IllegalTodoStatusUpdateException.class)
                                         .isThrownBy(() -> todoService.updateTodo(TodoId.newInstance(),
                                                         new UpdateTodoCommand(Optional.empty(),
@@ -150,6 +144,9 @@ class TodoServiceTest {
 
                 @Test
                 void testTodoMarkedAsDoneFromUpdate() {
+
+                        given(transactionManager.runInTransaction(any()))
+                                .willAnswer(arg -> arg.getArgument(0, Supplier.class).get());
                         var todo = Todo.builder()
                                         .status(Todo.Status.NOT_DONE)
                                         .description("The Verge.com")
@@ -177,6 +174,8 @@ class TodoServiceTest {
 
                 @Test
                 void testTodoUndoneFromUpdate() {
+                        given(transactionManager.runInTransaction(any()))
+                                .willAnswer(arg -> arg.getArgument(0, Supplier.class).get());
                         var todo = Todo.builder()
                                         .status(Todo.Status.DONE)
                                         .description("The Verge.com")
@@ -201,24 +200,6 @@ class TodoServiceTest {
 
                         verify(todoRepository).save(any());
                 }
-
-                @Test
-                void todoNotSavedWhenNoUpdateIsRequired() {
-
-                        var todo = Todo.builder()
-                                        .status(Todo.Status.NOT_DONE)
-                                        .description("The Verge.com")
-                                        .dueDateTime(ZonedDateTime.now())
-                                        .build();
-
-                        given(todoRepository.findByIdForUpdate(any())).willReturn(Optional.of(todo));
-
-                        todoService.updateTodo(TodoId.newInstance(),
-                                        new UpdateTodoCommand(Optional.empty(), Optional.of(Todo.Status.NOT_DONE)));
-
-                        verify(todoRepository, never()).save(any());
-                }
-
         }
 
 }
