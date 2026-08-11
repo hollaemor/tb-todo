@@ -12,13 +12,19 @@ import lombok.RequiredArgsConstructor;
 public class TodoService {
 
   private final TodoRepository todoRepository;
+  private final TodoEventPublisher eventPublisher;
   private final TodoTransactionManager<Todo> todoTransactionManager;
 
   public Todo createTodo(CreateTodoCommand createTodoCommand) {
-    return todoRepository.save(
+    var todo = todoTransactionManager.runInTransaction(() -> todoRepository.save(
         Todo.builder().description(createTodoCommand.description()).dueDateTime(createTodoCommand.dueDateTime())
             .createdAt(ZonedDateTime.now(ZoneId.of("UTC")))
-            .status(Todo.Status.NOT_DONE).build());
+            .status(Todo.Status.NOT_DONE).build())
+
+    );
+
+    eventPublisher.publishEvent(new TodoCreatedEvent(todo.getId()));
+    return todo;
   }
 
   public Todo getTodo(TodoId todoId) {
@@ -30,7 +36,7 @@ public class TodoService {
   }
 
   public Todo updateTodo(TodoId todoId, UpdateTodoCommand command) {
-    command.statusOptional().ifPresent( status -> {
+    command.statusOptional().ifPresent(status -> {
       if (status == Todo.Status.PAST_DUE) {
         throw new IllegalTodoStatusUpdateException("Updating the todo to this status is forbidden");
       }
@@ -42,7 +48,7 @@ public class TodoService {
       throw new TodoPastDueException();
     }
 
-    return todoTransactionManager.runInTransaction(() -> {
+    var updated = todoTransactionManager.runInTransaction(() -> {
       command.descriptionOptional().ifPresent(todo::setDescription);
       command.statusOptional().ifPresent(status -> {
         if (status == Todo.Status.DONE && todo.isNotDone()) {
@@ -53,6 +59,8 @@ public class TodoService {
       });
       return todoRepository.save(todo);
     });
+
+    return updated;
 
   }
 }
